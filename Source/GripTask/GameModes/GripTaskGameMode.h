@@ -13,7 +13,7 @@ class AGripTaskGameMode : public AGameModeBase
 
 public:
 	AGripTaskGameMode();
+
+protected:
+	virtual void BeginPlay() override;
 };
-
-
-
