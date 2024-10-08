@@ -6,11 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "MainMenuWidget.generated.h"
 
+class UButtonWidgetBase;
 class UCanvasPanel;
-class UButton;
-/**
- * 
- */
+
 UCLASS()
 class GRIPTASK_API UMainMenuWidget : public UUserWidget
 {
@@ -21,10 +19,10 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category="Bindings")
-	class UButton* StartButton;
+	UButtonWidgetBase* StartButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category="Bindings")
-	class UButton* ExitButton;
+	UButtonWidgetBase* ExitButton;
 
 	UFUNCTION()
 	void OnStartButtonClicked();

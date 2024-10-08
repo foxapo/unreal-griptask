@@ -46,7 +46,6 @@ class AGripTaskCharacter : public ACharacter
 
 public:
 	AGripTaskCharacter();
-	
 
 protected:
 
@@ -55,14 +54,12 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	// To add mapping context
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 
 public:
 	/** Returns CameraBoom subobject **/

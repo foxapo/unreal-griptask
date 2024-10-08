@@ -4,6 +4,8 @@
 #include "MainMenuWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "Widgets/ButtonWidgetBase.h"
+#include "Widgets/TextWidgetBase.h"
 
 
 void UMainMenuWidget::NativeConstruct()
@@ -12,12 +14,14 @@ void UMainMenuWidget::NativeConstruct()
 
 	if (StartButton)
 	{
-		StartButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartButtonClicked);
+		StartButton->ButtonText->SetText(FText::FromString("Start Game"));
+		StartButton->Button->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartButtonClicked);
 	}
 
 	if (ExitButton)
 	{
-		ExitButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitButtonClicked);
+		ExitButton->ButtonText->SetText(FText::FromString("Exit Game"));
+		ExitButton->Button->OnClicked.AddDynamic(this, &UMainMenuWidget::OnExitButtonClicked);
 	}
 }
 
