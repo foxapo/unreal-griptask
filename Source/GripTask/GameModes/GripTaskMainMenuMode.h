@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "GripTaskGameMode.generated.h"
+#include "GripTaskMainMenuMode.generated.h"
 
 UCLASS(minimalapi)
-class AGripTaskGameMode : public AGameModeBase
+class AGripTaskMainMenuMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	AGripTaskGameMode();
+	AGripTaskMainMenuMode();
 
 protected:
 	virtual void BeginPlay() override;
