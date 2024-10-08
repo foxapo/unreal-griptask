@@ -18,10 +18,4 @@ void AMainMenuHUD::BeginPlay()
 		}
 	}
 
-	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-	{
-		PlayerController->bShowMouseCursor = true;
-		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
-	}
 }
