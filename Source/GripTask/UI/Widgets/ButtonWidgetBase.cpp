@@ -1,7 +1,7 @@
 ﻿// Radek Cehak | Interview Task | Grip Digital
 
 #include "ButtonWidgetBase.h"
-
+#include "GripTask/Core/DebugMacros.h"
 
 void UButtonWidgetBase::NativeConstruct()
 {
@@ -14,14 +14,16 @@ void UButtonWidgetBase::SetButtonClickHandler()
 	if (Button)
 	{
 		Button->OnClicked.AddDynamic(this, &UButtonWidgetBase::OnButtonClicked);
+		Button->OnHovered.AddDynamic(this, &UButtonWidgetBase::OnButtonHovered);
 	}
 }
 
 void UButtonWidgetBase::OnButtonClicked()
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Button clicked"));
-	}
+	DEBUG_PRINT("Button clicked");
 }
 
+void UButtonWidgetBase::OnButtonHovered()
+{
+	DEBUG_PRINT("Button hovered");
+}

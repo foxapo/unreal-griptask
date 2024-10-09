@@ -29,7 +29,7 @@ protected:
 	UProgressBar* ManaBar;
 
 private:
-	AGripTaskCharacter* Character;
+	TWeakObjectPtr<AGripTaskCharacter> Character;
 
 	UFUNCTION()
 	void UpdateHealth(float Health);
@@ -42,4 +42,6 @@ private:
 	float CurrentManaPercent = 0;
 	float TargetManaPercent = 0;
 	float InterpolationSpeed = 5.0f;
+
+	bool bIsPlayer = false;
 };

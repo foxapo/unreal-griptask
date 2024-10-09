@@ -42,4 +42,6 @@ void UMainMenuWidget::OnExitButtonClicked()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Exit button clicked"));
 	}
+
+	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
 }

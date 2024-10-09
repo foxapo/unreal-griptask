@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "GripTask/Components/AttributeComponent.h"
 #include "GripTask/Core/DebugMacros.h"
 #include "GripTask/GameModes/GripTaskGameplayMode.h"
@@ -24,7 +25,7 @@ AGripTaskCharacter::AGripTaskCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -51,12 +52,14 @@ AGripTaskCharacter::AGripTaskCharacter()
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+	SetupMinimapCamera();
 }
 
 void AGripTaskCharacter::BeginPlay()
@@ -75,7 +78,7 @@ void AGripTaskCharacter::BeginPlay()
  */
 void AGripTaskCharacter::JumpImpl()
 {
-	if ( AttributeComponent->GetMana() > 25.f)
+	if (AttributeComponent->GetMana() > 25.f)
 	{
 		Super::Jump();
 		if (!GetCharacterMovement()->IsFalling())
@@ -85,6 +88,51 @@ void AGripTaskCharacter::JumpImpl()
 	{
 		DEBUG_PRINT("Not enough mana to jump");
 	}
+}
+
+void AGripTaskCharacter::SetupMinimapCamera()
+{
+	MinimapCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("MinimapCameraBoom"));
+	MinimapCameraBoom->SetupAttachment(RootComponent);
+	MinimapCameraBoom->TargetArmLength = 500.0f;
+	MinimapCameraBoom->bUsePawnControlRotation = true;
+	MinimapCameraBoom->bInheritPitch = false;
+	MinimapCameraBoom->bInheritYaw = false;
+	MinimapCameraBoom->bInheritRoll = false;
+	MinimapCameraBoom->bDoCollisionTest = false;
+	MinimapCameraBoom->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+
+	MinimapCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MinimapCapture"));
+	MinimapCapture->SetupAttachment(MinimapCameraBoom, USpringArmComponent::SocketName);
+	MinimapCapture->PostProcessBlendWeight = 0.0f;
+	MinimapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
+	MinimapCapture->bCaptureEveryFrame = true;
+	MinimapCapture->bCaptureOnMovement = true;
+	MinimapCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+
+	MinimapCapture->ShowFlags.SetAntiAliasing(false);
+	MinimapCapture->ShowFlags.SetAtmosphere(false);
+	MinimapCapture->ShowFlags.SetBSP(false);
+	MinimapCapture->ShowFlags.SetDecals(false);
+	MinimapCapture->ShowFlags.SetFog(false);
+	MinimapCapture->ShowFlags.SetGrid(false);
+	MinimapCapture->ShowFlags.SetParticles(false);
+	MinimapCapture->ShowFlags.SetSkeletalMeshes(false);
+	MinimapCapture->ShowFlags.SetLighting(false);
+	MinimapCapture->ShowFlags.SetTranslucency(false);
+	MinimapCapture->ShowFlags.SetPostProcessing(false);
+	MinimapCapture->ShowFlags.SetSkyLighting(false);
+	MinimapCapture->ShowFlags.SetDynamicShadows(false);
+	MinimapCapture->ShowFlags.SetVolumetricFog(false);
+
+	MinimapCapture->ShowFlags.SetStaticMeshes(true);
+	MinimapCapture->ShowFlags.SetLandscape(true);
+	MinimapCapture->ShowFlags.SetInstancedFoliage(true);
+	MinimapCapture->ShowFlags.SetInstancedGrass(true);
+	MinimapCapture->ShowFlags.SetInstancedStaticMeshes(true);
+
+	MinimapCapture->HiddenActors.Add(this);
+	MinimapCapture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
 }
 
 void AGripTaskCharacter::Jump()
@@ -100,28 +148,27 @@ void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
+
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
-		// Jumping
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Move);
-
-		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Look);
 	}
 	else
 	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogTemplateCharacter, Error,
+		       TEXT(
+			       "'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."
+		       ), *GetNameSafe(this));
 	}
 }
 
@@ -138,7 +185,7 @@ void AGripTaskCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -158,6 +205,9 @@ void AGripTaskCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+
+		// Rotate the minimap camera
+		MinimapCapture->SetWorldRotation(FRotator(-90.0f, GetControlRotation().Yaw, 0.0f));
 	}
 }
 

@@ -20,15 +20,15 @@ class GRIPTASK_API UButtonWidgetBase : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* Button;
-
 	UPROPERTY(meta = (BindWidget))
 	UTextWidgetBase* ButtonText;
 
 protected:
 	virtual void NativeConstruct() override;
-
+	UFUNCTION()
+	void OnButtonHovered();
+	UFUNCTION()
 	void SetButtonClickHandler();
-
 	UFUNCTION()
 	void OnButtonClicked();
 };

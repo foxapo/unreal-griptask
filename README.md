@@ -3,7 +3,7 @@ Developed with Unreal Engine 5
 
 ## Features
 
-- [ ] Main Menu - Separate Level (Map)
+- [x] Main Menu - Separate Level (Map)
 
 Main Menu should be set as a separate level (map) that loads some 
 kind of a main UI manager. We can consider this manager as some static Object
@@ -13,7 +13,7 @@ This manager should be responsible for lifetime of ingame widgets and screens.
 
 Only one UI manager should be active at a time.
 
-- [ ] In-Game Mouse Controls 
+- [x] In-Game Mouse Controls 
 
 Replace the default behavior by changing the enhanced input mapping. We should disable the default rotation towards movement.
 
