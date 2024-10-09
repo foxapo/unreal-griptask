@@ -11,7 +11,8 @@ void UMinimapWidget::NativeConstruct()
 
 	if (MinimapTimeText)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UMinimapWidget::UpdateTimeText, UMinimapWidget::MINIMAP_TIME_UPDATE_INTERVAL, true);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UMinimapWidget::UpdateTimeText,
+		                                       UMinimapWidget::MINIMAP_TIME_UPDATE_INTERVAL, true);
 	}
 
 	if (MapBackgroundColor)
@@ -42,4 +43,3 @@ void UMinimapWidget::UpdateTimeText() const
 		MinimapTimeText->SetText(FText::FromString(TimeString));
 	}
 }
-

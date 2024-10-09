@@ -58,6 +58,11 @@ void UAttributeComponent::ConsumeMana(const float Value)
 	NotifyManaChanged();
 }
 
+FName UAttributeComponent::GetId() const
+{
+	return CharacterStatsId;
+}
+
 void UAttributeComponent::RegenerateMana(float DeltaTime)
 {
 	if (CurrentMana < MaxMana)

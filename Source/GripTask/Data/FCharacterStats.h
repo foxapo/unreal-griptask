@@ -11,11 +11,11 @@ struct FCharacterStats : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
-	float MaxHealth;
+	float MaxHealth = 10;
 
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
-	float MaxMana;
+	float MaxMana = 10;
 
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
-	float NaturalManaRegen;
+	float NaturalManaRegen = 1;
 };

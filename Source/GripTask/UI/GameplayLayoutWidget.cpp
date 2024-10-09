@@ -4,13 +4,13 @@
 #include "GameplayLayoutWidget.h"
 #include "Components/NamedSlot.h"
 #include "GripTask/Characters/GripTaskCharacter.h"
+#include "GripTask/Components/TargetComponent.h"
 #include "GripTask/Core/DebugMacros.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/MinimapWidget.h"
 #include "Widgets/UnitFrameWidget.h"
+#include "GripTask/Interfaces/UTargetInterface.h"
 
-
-// native construct
 void UGameplayLayoutWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -18,27 +18,90 @@ void UGameplayLayoutWidget::NativeConstruct()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Gameplay layout widget initialized"));
 	}
-	PlayerCharacter = Cast<AGripTaskCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (!PlayerCharacter)
-	{
-		DEBUG_PRINT("Player character not found");
-	}
-	else
-	{
-		DEBUG_PRINT("Player assigned to the UI Layout");
-	}
 
 	InitializePlayerWidgets();
 }
 
-
 void UGameplayLayoutWidget::InitializePlayerWidgets()
 {
+	PlayerCharacter = Cast<AGripTaskCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!PlayerCharacter.IsValid())
+	{
+		DEBUG_PRINT("Player character not found");
+		return;
+	}
+
 	InitializePlayerUnitFrameWidget();
 	InitializeTargetUnitFrameWidget();
 	InitializeMinimapWidget();
+
+	TScriptInterface<ITargetInterface> PlayerTargetInterface;
+	PlayerTargetInterface.SetObject(PlayerCharacter.Get());
+	PlayerTargetInterface.SetInterface(Cast<ITargetInterface>(PlayerCharacter));
+	SetPlayerFrame(PlayerTargetInterface);
 }
 
+void UGameplayLayoutWidget::SetPlayerFrame(const TScriptInterface<ITargetInterface>& Target) const
+{
+	PlayerUnitFrameWidget->InitTarget(Target);
+}
+
+void UGameplayLayoutWidget::SetTargetFrame(const TScriptInterface<ITargetInterface>& Target) const
+{
+	TargetUnitFrameWidget->InitTarget(Target);
+}
+
+void UGameplayLayoutWidget::OnTargetChanged(bool bIsTarget) const
+{
+	if (bIsTarget)
+	{
+		SetTargetFrame(PlayerCharacter->GetActorTargetComponent()->GetCurrentTarget());
+		TargetUnitFrameWidget->Toggle(true);
+	}
+	else
+	{
+		SetTargetFrame(nullptr);
+		TargetUnitFrameWidget->Toggle(false);
+	}
+}
+
+// * WIDGET INITIALIZATION * //
+
+void UGameplayLayoutWidget::InitializePlayerUnitFrameWidget()
+{
+	if (!PlayerUnitFrameClass)
+	{
+		DEBUG_PRINT("Player unit frame widget class not set");
+		return;
+	}
+
+	PlayerUnitFrameWidget = CreateWidget<UUnitFrameWidget>(GetWorld(), PlayerUnitFrameClass);
+	PlayerUnitFrameSlot->AddChild(PlayerUnitFrameWidget);
+}
+
+void UGameplayLayoutWidget::InitializeTargetUnitFrameWidget()
+{
+	if (!TargetUnitFrameClass)
+	{
+		DEBUG_PRINT("Target unit frame widget class not set");
+	}
+
+	if (!TargetUnitFrameWidget)
+	{
+		TargetUnitFrameWidget = CreateWidget<UUnitFrameWidget>(GetWorld(), TargetUnitFrameClass);
+	}
+
+	if (TargetUnitFrameWidget)
+	{
+		TargetUnitFrameSlot->AddChild(TargetUnitFrameWidget);
+	}
+	else
+	{
+		DEBUG_PRINT("Target unit frame widget not initialized");
+	}
+}
+
+// * MINIMAP * //
 
 void UGameplayLayoutWidget::InitializeMinimapWidget()
 {
@@ -56,44 +119,5 @@ void UGameplayLayoutWidget::InitializeMinimapWidget()
 	else
 	{
 		DEBUG_PRINT("Minimap widget not initialized");
-	}
-}
-
-void UGameplayLayoutWidget::InitializePlayerUnitFrameWidget()
-{
-	if (!PlayerUnitFrameClass)
-	{
-		DEBUG_PRINT("Player unit frame widget class not set");
-	}
-
-	PlayerUnitFrameWidget = CreateWidget<UUnitFrameWidget>(GetWorld(), PlayerUnitFrameClass);
-	if (PlayerUnitFrameWidget)
-	{
-		PlayerUnitFrameSlot->AddChild(PlayerUnitFrameWidget);
-		PlayerUnitFrameWidget->InitPlayer(PlayerCharacter);
-		DEBUG_PRINT("Player unit frame widget initialized");
-	}
-	else
-	{
-		DEBUG_PRINT("Player unit frame widget not initialized");
-	}
-}
-
-void UGameplayLayoutWidget::InitializeTargetUnitFrameWidget()
-{
-	if (!TargetUnitFrameClass)
-	{
-		DEBUG_PRINT("Target unit frame widget class not set");
-	}
-
-	TargetUnitFrameWidget = CreateWidget<UUnitFrameWidget>(GetWorld(), TargetUnitFrameClass);
-	if (TargetUnitFrameWidget)
-	{
-		TargetUnitFrameSlot->AddChild(TargetUnitFrameWidget);
-		DEBUG_PRINT("Target unit frame widget initialized");
-	}
-	else
-	{
-		DEBUG_PRINT("Target unit frame widget not initialized");
 	}
 }

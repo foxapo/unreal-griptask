@@ -14,27 +14,22 @@ class GRIPTASK_API UAttributeComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UAttributeComponent();
 	FName GetCharacterStatsId() const { return CharacterStatsId; }
 	void SetBaseStats(const FCharacterStats* Stats);
 	void RegenerateMana(float DeltaTime);
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
-
-	// GETTERS 
-
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	float GetHealth() const { return CurrentHealth; }
 	float GetMana() const { return CurrentMana; }
 	float GetMaxHealth() const { return MaxHealth; }
 	float GetMaxMana() const { return MaxMana; }
 	float GetNaturalManaRegen() const { return NaturalManaRegen; }
 	void ConsumeMana(float Value);
+	FName GetId() const;
 
 	// EVENTS
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, Health);
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChanged, float, Mana);
 
 	UPROPERTY(BlueprintAssignable, Category="Attributes")
@@ -51,9 +46,6 @@ protected:
 
 	void NotifyHealthChanged() const;
 	void NotifyManaChanged() const;
-
-public:
-
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", meta = (AllowPrivateAccess = "true"))

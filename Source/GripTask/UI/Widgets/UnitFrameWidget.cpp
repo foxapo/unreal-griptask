@@ -17,23 +17,43 @@ void UUnitFrameWidget::NativeConstruct()
 	TargetHealthPercent = 0;
 }
 
-void UUnitFrameWidget::InitPlayer(AGripTaskCharacter* Player)
+void UUnitFrameWidget::Toggle(bool State)
 {
-	Character = Player;
-	if (Character->GetAttributeComponent())
+	if (State)
+	{
+		this->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		this->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UUnitFrameWidget::InitTarget(TScriptInterface<ITargetInterface> Target)
+{
+	if (Target == nullptr)
+	{
+		bIsPlayer = false;
+		CurrentTarget = nullptr;
+		return;
+	}
+
+	CurrentTarget = Target;
+	if (CurrentTarget->GetAttributeComponent())
 	{
 		bIsPlayer = true;
-		Character->GetAttributeComponent()->OnHealthChanged.AddDynamic(this, &UUnitFrameWidget::UpdateHealth);
-		Character->GetAttributeComponent()->OnManaChanged.AddDynamic(this, &UUnitFrameWidget::UpdateMana);
-		UpdateHealth(Character->GetAttributeComponent()->GetMaxHealth());
-		UpdateMana(Character->GetAttributeComponent()->GetMaxMana());
+		CurrentTarget->GetAttributeComponent()->OnHealthChanged.AddDynamic(this, &UUnitFrameWidget::UpdateHealth);
+		CurrentTarget->GetAttributeComponent()->OnManaChanged.AddDynamic(this, &UUnitFrameWidget::UpdateMana);
+		UpdateHealth(CurrentTarget->GetAttributeComponent()->GetMaxHealth());
+		UpdateMana(CurrentTarget->GetAttributeComponent()->GetMaxMana());
 	}
 }
 
 void UUnitFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
-	if (!Character.IsValid())
+
+	if (CurrentTarget == nullptr)
 	{
 		bIsPlayer = false;
 		return;
@@ -41,7 +61,8 @@ void UUnitFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 	if (CurrentHealthPercent != TargetHealthPercent) // Prevents of updating the health bar when it's not needed
 	{
-		CurrentHealthPercent = FMath::FInterpTo(CurrentHealthPercent, TargetHealthPercent, InDeltaTime, InterpolationSpeed);
+		CurrentHealthPercent = FMath::FInterpTo(CurrentHealthPercent, TargetHealthPercent, InDeltaTime,
+		                                        InterpolationSpeed);
 		HealthBar->SetPercent(CurrentHealthPercent);
 	}
 
@@ -54,18 +75,18 @@ void UUnitFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 void UUnitFrameWidget::UpdateHealth(float Health)
 {
-	if(!bIsPlayer)
+	if (!bIsPlayer)
 	{
 		return;
 	}
-	TargetHealthPercent = Health / Character->GetAttributeComponent()->GetMaxHealth();
+	TargetHealthPercent = Health / CurrentTarget->GetAttributeComponent()->GetMaxHealth();
 }
 
 void UUnitFrameWidget::UpdateMana(float Mana)
 {
-	if(!bIsPlayer)
+	if (!bIsPlayer)
 	{
 		return;
 	}
-	TargetManaPercent = Mana / Character->GetAttributeComponent()->GetMaxMana();
+	TargetManaPercent = Mana / CurrentTarget->GetAttributeComponent()->GetMaxMana();
 }

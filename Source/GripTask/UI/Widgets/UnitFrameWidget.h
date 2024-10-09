@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UnitFrameWidget.generated.h"
 
+class ITargetInterface;
 class UAttributeComponent;
 class UProgressBar;
 class AGripTaskCharacter;
@@ -19,7 +20,8 @@ class GRIPTASK_API UUnitFrameWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
-	void InitPlayer(AGripTaskCharacter* Player);
+	void Toggle(bool State);
+	void InitTarget(TScriptInterface<ITargetInterface> Target);
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 protected:
@@ -29,7 +31,7 @@ protected:
 	UProgressBar* ManaBar;
 
 private:
-	TWeakObjectPtr<AGripTaskCharacter> Character;
+	TScriptInterface<ITargetInterface> CurrentTarget;
 
 	UFUNCTION()
 	void UpdateHealth(float Health);

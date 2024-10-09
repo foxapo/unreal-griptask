@@ -2,6 +2,7 @@
 
 #include "GripTaskCharacter.h"
 #include "Engine/LocalPlayer.h"
+#include "Engine/Engine.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,14 +13,11 @@
 #include "InputActionValue.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "GripTask/Components/AttributeComponent.h"
+#include "GripTask/Components/TargetComponent.h"
 #include "GripTask/Core/DebugMacros.h"
 #include "GripTask/GameModes/GripTaskGameplayMode.h"
 
-
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
-
-//////////////////////////////////////////////////////////////////////////
-// AGripTaskCharacter
 
 AGripTaskCharacter::AGripTaskCharacter()
 {
@@ -35,8 +33,6 @@ AGripTaskCharacter::AGripTaskCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
-	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
-	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -49,16 +45,13 @@ AGripTaskCharacter::AGripTaskCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	TargetComponent = CreateDefaultSubobject<UTargetComponent>(TEXT("TargetComponent"));
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+
 	SetupMinimapCamera();
 }
 
@@ -66,11 +59,43 @@ void AGripTaskCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	InitializeComponents();
+}
+
+void AGripTaskCharacter::InitializeComponents() const
+{
 	if (!AttributeComponent)
 	{
 		DEBUG_PRINT("AttributeComponent not set");
 	}
-	SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
+	else
+	{
+		SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
+	}
+
+	if (!TargetComponent)
+	{
+		DEBUG_PRINT("TargetComponent not set");
+	}
+	else
+	{
+		TargetComponent->SetPlayerController(Cast<APlayerController>(GetController()));
+	}
+}
+
+bool AGripTaskCharacter::IsTarget() const
+{
+	return true;
+}
+
+UTargetComponent* AGripTaskCharacter::GetActorTargetComponent()
+{
+	return TargetComponent;
+}
+
+UAttributeComponent* AGripTaskCharacter::GetAttributeComponent()
+{
+	return AttributeComponent;
 }
 
 /**
@@ -140,12 +165,23 @@ void AGripTaskCharacter::Jump()
 	JumpImpl();
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
+void AGripTaskCharacter::LeftMouseClicked(const FInputActionValue& Value)
+{
+	if (Value.Get<bool>())
+	{
+		DEBUG_PRINT("Left mouse clicked");
+		if(TargetComponent)
+			TargetComponent->LeftMouseClicked();
+	}
+}
+
+void AGripTaskCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
 
 void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
@@ -155,13 +191,14 @@ void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		}
 	}
 
-	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Look);
+		EnhancedInputComponent->BindAction(LeftMouseClickAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::LeftMouseClicked);
 	}
 	else
 	{

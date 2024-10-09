@@ -22,10 +22,4 @@ void AGameplayHUD::BeginPlay()
 	}
 
 	GameplayLayoutWidget->AddToViewport();
-
-	// DEBUG PURPOSES
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("GameplayHUD created"));
-	}
 }

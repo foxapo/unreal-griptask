@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "GripTask/Interfaces/UTargetInterface.h"
 #include "GameplayLayoutWidget.generated.h"
 
 class AGripTaskCharacter;
 class UMinimapWidget;
 class UUnitFrameWidget;
 class UNamedSlot;
+
 
 /**
  * Main gameplay layout widget that is created in the GameplayHUD 
@@ -48,10 +50,10 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UNamedSlot* MinimapSlot;
 
-	UPROPERTY(BlueprintReadOnly, Category="Player" , meta = (AllowPrivateAccess = "true"))
-	AGripTaskCharacter* PlayerCharacter;
-
 private:
+
+	TWeakObjectPtr<AGripTaskCharacter> PlayerCharacter;
+	
 	UFUNCTION()
 	void InitializeMinimapWidget();
 
@@ -60,6 +62,15 @@ private:
 
 	UFUNCTION()
 	void InitializePlayerUnitFrameWidget();
+
+	UFUNCTION()
+	void SetPlayerFrame(const TScriptInterface<ITargetInterface>& Target) const;
+
+	UFUNCTION()
+	void SetTargetFrame(const TScriptInterface<ITargetInterface>& Target) const;
+
+	UFUNCTION()
+	void OnTargetChanged(bool bIsTarget) const;
 
 	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
 	class UUnitFrameWidget* PlayerUnitFrameWidget;

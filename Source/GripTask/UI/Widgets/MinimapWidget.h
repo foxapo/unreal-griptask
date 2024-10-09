@@ -21,7 +21,7 @@ public:
 
 	const float MINIMAP_TIME_UPDATE_INTERVAL = 1.0f;
 	const FString TIME_FORMAT = TEXT("%H:%M:%S");
-	
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* MapBackgroundColor;
