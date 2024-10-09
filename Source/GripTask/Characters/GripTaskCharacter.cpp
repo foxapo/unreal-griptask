@@ -10,6 +10,10 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "GripTask/Components/AttributeComponent.h"
+#include "GripTask/Core/DebugMacros.h"
+#include "GripTask/GameModes/GripTaskGameplayMode.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -52,12 +56,40 @@ AGripTaskCharacter::AGripTaskCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
 }
 
 void AGripTaskCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	if (!AttributeComponent)
+	{
+		DEBUG_PRINT("AttributeComponent not set");
+	}
+	SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
+}
+
+/**
+ * @brief Custom jump implementation that is extended by mana consumption, prevents jumping if not enough mana
+ */
+void AGripTaskCharacter::JumpImpl()
+{
+	if ( AttributeComponent->GetMana() > 25.f)
+	{
+		Super::Jump();
+		if (!GetCharacterMovement()->IsFalling())
+			AttributeComponent->ConsumeMana(25.f);
+	}
+	else
+	{
+		DEBUG_PRINT("Not enough mana to jump");
+	}
+}
+
+void AGripTaskCharacter::Jump()
+{
+	JumpImpl();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,5 +158,16 @@ void AGripTaskCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AGripTaskCharacter::SetupCharacterStats(const FName Id) const
+{
+	if (const AGripTaskGameplayMode* GameMode = Cast<AGripTaskGameplayMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if (FCharacterStats* Stats = GameMode->GetCharacterStats(Id))
+		{
+			AttributeComponent->SetBaseStats(Stats);
+		}
 	}
 }

@@ -6,6 +6,8 @@
 #include "GameFramework/GameMode.h"
 #include "GripTaskGameplayMode.generated.h"
 
+struct FCharacterStats;
+class UDataTable;
 /**
  * 
  */
@@ -16,4 +18,9 @@ class GRIPTASK_API AGripTaskGameplayMode : public AGameMode
 
 public:
 	virtual void BeginPlay() override;
+	FCharacterStats* GetCharacterStats(FName RowName) const;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay")
+	UDataTable* CharacterStatsDataTable;
 };

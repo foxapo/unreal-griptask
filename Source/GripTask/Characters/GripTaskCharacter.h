@@ -7,10 +7,13 @@
 #include "Logging/LogMacros.h"
 #include "GripTaskCharacter.generated.h"
 
+class UAttributeComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class AGripTaskGameplayMode;
+struct FCharacterStats;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -27,7 +30,7 @@ class AGripTaskCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-	
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -44,22 +47,29 @@ class AGripTaskCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Attribute */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
+	UAttributeComponent* AttributeComponent;
+
 public:
 	AGripTaskCharacter();
 
-protected:
+	UAttributeComponent* GetAttributeComponent() const { return AttributeComponent; }
 
+protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
 	// To add mapping context
 	virtual void BeginPlay() override;
+	void JumpImpl();
+
+	virtual void Jump() override;
+	
+	void SetupCharacterStats(FName Id) const;
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -67,4 +77,3 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-

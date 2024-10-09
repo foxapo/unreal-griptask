@@ -1,7 +1,8 @@
 ﻿// Radek Cehak | Interview Task | Grip Digital
 
-
 #include "GripTaskGameplayMode.h"
+#include "Engine/DataTable.h"
+#include "GripTask/Data/FCharacterStats.h"
 
 void AGripTaskGameplayMode::BeginPlay()
 {
@@ -17,4 +18,14 @@ void AGripTaskGameplayMode::BeginPlay()
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
 	}
+}
+
+FCharacterStats* AGripTaskGameplayMode::GetCharacterStats(FName RowName) const
+{
+	if (CharacterStatsDataTable)
+	{
+		static const FString ContextString(TEXT("Character Stats Context"));
+		return CharacterStatsDataTable->FindRow<FCharacterStats>(RowName, ContextString);
+	}
+	return nullptr;
 }

@@ -3,7 +3,9 @@
 
 #include "GameplayLayoutWidget.h"
 #include "Components/NamedSlot.h"
+#include "GripTask/Characters/GripTaskCharacter.h"
 #include "GripTask/Core/DebugMacros.h"
+#include "Kismet/GameplayStatics.h"
 #include "Widgets/MinimapWidget.h"
 #include "Widgets/UnitFrameWidget.h"
 
@@ -12,11 +14,21 @@
 void UGameplayLayoutWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	InitializePlayerWidgets();
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Gameplay layout widget initialized"));
 	}
+	PlayerCharacter = Cast<AGripTaskCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!PlayerCharacter)
+	{
+		DEBUG_PRINT("Player character not found");
+	}
+	else
+	{
+		DEBUG_PRINT("Player assigned to the UI Layout");
+	}
+
+	InitializePlayerWidgets();
 }
 
 
@@ -58,6 +70,7 @@ void UGameplayLayoutWidget::InitializePlayerUnitFrameWidget()
 	if (PlayerUnitFrameWidget)
 	{
 		PlayerUnitFrameSlot->AddChild(PlayerUnitFrameWidget);
+		PlayerUnitFrameWidget->InitPlayer(PlayerCharacter);
 		DEBUG_PRINT("Player unit frame widget initialized");
 	}
 	else

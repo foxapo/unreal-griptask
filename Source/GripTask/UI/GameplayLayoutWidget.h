@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameplayLayoutWidget.generated.h"
 
+class AGripTaskCharacter;
 class UMinimapWidget;
 class UUnitFrameWidget;
 class UNamedSlot;
@@ -46,6 +47,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UNamedSlot* MinimapSlot;
+
+	UPROPERTY(BlueprintReadOnly, Category="Player" , meta = (AllowPrivateAccess = "true"))
+	AGripTaskCharacter* PlayerCharacter;
 
 private:
 	UFUNCTION()
