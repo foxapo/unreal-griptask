@@ -23,7 +23,6 @@ class GRIPTASK_API ATargetDummyActor : public AActor, public ITargetInterface, p
 	UTargetComponent* TargetComponent;
 
 public:
-	// Sets default values for this actor's properties
 	ATargetDummyActor();
 	virtual bool IsTarget() override;
 	virtual UTargetComponent* GetActorTargetComponent() override;
@@ -31,12 +30,9 @@ public:
 	virtual void SetupCharacterStats(FName Id) override;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
 };

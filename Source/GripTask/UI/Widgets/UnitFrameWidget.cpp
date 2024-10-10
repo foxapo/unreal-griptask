@@ -38,6 +38,10 @@ void UUnitFrameWidget::UnsubscribeTarget()
 		CurrentTarget->GetAttributeComponent()->OnHealthChanged.RemoveDynamic(this, &UUnitFrameWidget::UpdateHealth);
 		CurrentTarget->GetAttributeComponent()->OnManaChanged.RemoveDynamic(this, &UUnitFrameWidget::UpdateMana);
 	}
+	// CurrentHealthPercent = 0;
+	// HealthBar->SetPercent(CurrentHealthPercent);
+	// CurrentManaPercent = 0;
+	// ManaBar->SetPercent(CurrentManaPercent);
 	CurrentTarget = nullptr;
 }
 
@@ -52,6 +56,7 @@ void UUnitFrameWidget::SubscribeTarget()
 		UpdateMana(CurrentTarget->GetAttributeComponent()->GetMaxMana());
 		UpdateName(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterName);
 		UpdatePortrait(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterSprite);
+		UpdateLevel(CurrentTarget->GetAttributeComponent()->GetBaseStats().Level);
 	}
 }
 
@@ -134,4 +139,13 @@ void UUnitFrameWidget::UpdatePortrait(UTexture2D* Portrait) const
 		return;
 	}
 	PlayerPortrait->SetBrushFromTexture(Portrait);
+}
+
+void UUnitFrameWidget::UpdateLevel(int8 Level) const
+{
+	if (!bIsPlayer)
+	{
+		return;
+	}
+	LevelValue->SetText(FText::FromString(FString::Printf(TEXT("%d"), Level)));
 }

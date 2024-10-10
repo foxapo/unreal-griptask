@@ -8,11 +8,8 @@
 #include "GripTask/Core/DebugMacros.h"
 #include "GripTask/GameModes/GripTaskGameplayMode.h"
 
-
-// Sets default values
 ATargetDummyActor::ATargetDummyActor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
 	TargetComponent = CreateDefaultSubobject<UTargetComponent>(TEXT("TargetComponent"));
@@ -33,7 +30,6 @@ UAttributeComponent* ATargetDummyActor::GetAttributeComponent()
 	return AttributeComponent;
 }
 
-// Called when the game starts or when spawned
 void ATargetDummyActor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,7 +43,6 @@ void ATargetDummyActor::BeginPlay()
 	}
 }
 
-
 void ATargetDummyActor::SetupCharacterStats(FName Id)
 {
 	if (const AGripTaskGameplayMode* GameMode = Cast<AGripTaskGameplayMode>(GetWorld()->GetAuthGameMode()))
@@ -59,7 +54,6 @@ void ATargetDummyActor::SetupCharacterStats(FName Id)
 	}
 }
 
-// Called every frame
 void ATargetDummyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

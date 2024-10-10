@@ -41,6 +41,8 @@ protected:
 	UTextBlock* HealthValue;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ManaValue;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* LevelValue;
 
 private:
 	TScriptInterface<ITargetInterface> CurrentTarget;
@@ -53,6 +55,8 @@ private:
 	void UpdateName(const FString& Name) const;
 	UFUNCTION()
 	void UpdatePortrait(UTexture2D* Portrait) const;
+	UFUNCTION()
+	void UpdateLevel(int8 Level) const;
 
 
 	// Interpolation of the bar change
