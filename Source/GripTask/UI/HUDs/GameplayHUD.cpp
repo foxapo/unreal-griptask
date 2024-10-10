@@ -23,3 +23,12 @@ void AGameplayHUD::BeginPlay()
 
 	GameplayLayoutWidget->AddToViewport();
 }
+
+void AGameplayHUD::ToggleQuestLog()
+{
+	bQuestMenuVisible = !bQuestMenuVisible;
+	if (GameplayLayoutWidget)
+	{
+		GameplayLayoutWidget->SetQuestMenu(bQuestMenuVisible);
+	}
+}

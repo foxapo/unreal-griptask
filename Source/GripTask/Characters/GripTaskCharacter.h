@@ -48,6 +48,9 @@ class AGripTaskCharacter : public ACharacter, public ITargetInterface, public IA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LeftMouseClickAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleQuestAction;
+
 	/* MINIMAP */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* MinimapCameraBoom;
@@ -67,6 +70,7 @@ public:
 	virtual UTargetComponent* GetActorTargetComponent() override;
 	virtual UAttributeComponent* GetAttributeComponent() override;
 	virtual void SetupCharacterStats(FName Id) override;
+	void ToggleQuestLog();
 
 protected:
 	void Move(const FInputActionValue& Value);

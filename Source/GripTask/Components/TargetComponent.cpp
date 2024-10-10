@@ -5,7 +5,6 @@
 #include "GripTask/Characters/GripTaskCharacter.h"
 #include "GripTask/Core/DebugMacros.h"
 
-// Sets default values for this component's properties
 UTargetComponent::UTargetComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -17,26 +16,41 @@ void UTargetComponent::SetPlayerController(APlayerController* Controller)
 	bIsPlayer = true;
 }
 
-void UTargetComponent::SetTarget(TScriptInterface<ITargetInterface> NewTarget)
+void UTargetComponent::SetTarget(UObject* Object)
 {
-	Target = NewTarget;
+	if (ITargetInterface* TargetInterface = Cast<ITargetInterface>(Object))
+	{
+		if (Target.GetInterface() == TargetInterface)
+		{
+			return;
+		}
+
+		if (Target)
+		{
+			UnsetTarget();
+		}
+
+		Target.SetObject(Object);
+		Target.SetInterface(TargetInterface);
+		Target->GetActorTargetComponent()->OnSelected.Broadcast();
+		OnTargetChanged.Broadcast(true);
+	}
 }
 
-void UTargetComponent::LeftMouseClicked()
+void UTargetComponent::UnsetTarget()
 {
-	RaycastTargetInterface();
+	if (Target != nullptr)
+	{
+		Target->GetActorTargetComponent()->OnDeselected.Broadcast();
+		Target = nullptr;
+		OnTargetChanged.Broadcast(false);
+	}
 }
 
 void UTargetComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	NotifyTargetChange(false);
-}
-
-void UTargetComponent::NotifyTargetChange(bool bIsTarget)
-{
-	DEBUG_PRINT("Target changed");
-	OnTargetChanged.Broadcast(bIsTarget);
+	OnTargetChanged.Broadcast(false);
 }
 
 void UTargetComponent::RaycastTargetInterface()
@@ -54,44 +68,17 @@ void UTargetComponent::RaycastTargetInterface()
 		{
 			if (HitResult.GetActor()->GetClass()->ImplementsInterface(UTargetInterface::StaticClass()))
 			{
-				if (HitResult.GetActor() == PlayerController->GetPawn())
+				if (HitResult.GetActor() == GetOwner())
 				{
+					// DO NOTHING WHEN CLICK ON PLAYER
 					return;
 				}
 
-				if (ITargetInterface* TargetInterface = Cast<ITargetInterface>(HitResult.GetActor()))
-				{
-					if (Target.GetInterface() != TargetInterface)
-					{
-						Target.SetObject(HitResult.GetActor());
-						Target.SetInterface(TargetInterface);
-						NotifyTargetChange(true);
-					}
-					return;
-				}
+				SetTarget(HitResult.GetActor());
+				return;
 			}
 		}
 	}
 
-	Target = nullptr;
-	NotifyTargetChange(false);
+	UnsetTarget();
 }
-
-// void UTargetActorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-//                                           FActorComponentTickFunction* ThisTickFunction)
-// {
-// 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-// 	if (!bIsPlayer)
-// 	{
-// 		return;
-// 	}
-//
-// 	if (RaycastTargetInterface()) return;
-//
-// 	if (Target != nullptr && !bLostFocus)
-// 	{
-// 		Target = nullptr;
-// 		NotifyTargetChange();
-// 		bLostFocus = true;
-// 	}
-// }

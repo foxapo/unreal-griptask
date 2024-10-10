@@ -8,19 +8,25 @@
 #include "GripTask/Interfaces/TargetInterface.h"
 #include "TargetDummyActor.generated.h"
 
-class UAttributeComponent;
-class UTargetComponent;
-
 UCLASS()
 class GRIPTASK_API ATargetDummyActor : public AActor, public ITargetInterface, public IAttributeInterface
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Transient)
-	UAttributeComponent* AttributeComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* MeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Transient)
-	UTargetComponent* TargetComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* NameplateComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UArrowComponent* ArrowComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Mesh;
 
 public:
 	ATargetDummyActor();
@@ -32,7 +38,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+
+	UPROPERTY(VisibleAnywhere)
+	class UAttributeComponent* AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	class UTargetComponent* TargetComponent;
+
 public:
 	virtual void Tick(float DeltaTime) override;
-
 };

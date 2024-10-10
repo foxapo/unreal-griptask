@@ -5,12 +5,15 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GripTask/Interfaces/TargetInterface.h"
+#include "HUDs/GameplayHUD.h"
 #include "GameplayLayoutWidget.generated.h"
 
+class UCanvasPanel;
 class AGripTaskCharacter;
 class UMinimapWidget;
 class UUnitFrameWidget;
 class UNamedSlot;
+class UQuestMenu;
 
 
 /**
@@ -23,10 +26,10 @@ class GRIPTASK_API UGameplayLayoutWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
-
 	UUnitFrameWidget* GetPlayerUnitFrameWidget() const { return PlayerUnitFrameWidget; }
 	UUnitFrameWidget* GetTargetUnitFrameWidget() const { return TargetUnitFrameWidget; }
 	UMinimapWidget* GetMinimapWidget() const { return MinimapWidget; }
+	void SetQuestMenu(bool bQuestMenuVisible) const;
 
 protected:
 	UFUNCTION()
@@ -41,6 +44,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Player Widgets")
 	TSubclassOf<class UMinimapWidget> MinimapWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="Player Widgets")
+	TSubclassOf<class UQuestMenu> QuestMenuClass;
+
 	UPROPERTY(meta = (BindWidget))
 	UNamedSlot* PlayerUnitFrameSlot;
 
@@ -50,10 +56,15 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UNamedSlot* MinimapSlot;
 
-private:
+	UPROPERTY(meta = (BindWidget))
+	UNamedSlot* PlayerQuestLogSlot;
 
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* CanvasPanel;
+
+private:
 	TWeakObjectPtr<AGripTaskCharacter> PlayerCharacter;
-	
+
 	UFUNCTION()
 	void InitializeMinimapWidget();
 
@@ -62,6 +73,9 @@ private:
 
 	UFUNCTION()
 	void InitializePlayerUnitFrameWidget();
+
+	UFUNCTION()
+	void InitializeQuestMenu();
 
 	UFUNCTION()
 	void SetPlayerFrame(TScriptInterface<ITargetInterface> Target);
@@ -80,4 +94,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
 	class UMinimapWidget* MinimapWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
+	class UQuestMenu* QuestMenuWidget;
 };

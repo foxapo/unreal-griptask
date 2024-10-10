@@ -16,18 +16,36 @@ class GRIPTASK_API UTargetComponent : public UActorComponent
 public:
 	UTargetComponent();
 	void SetPlayerController(APlayerController* NewController);
-	void SetTarget(TScriptInterface<ITargetInterface> NewTarget);
-	void LeftMouseClicked();
+	void SetTarget(UObject* NewObject);
+	void UnsetTarget();
+	void RaycastTargetInterface();
 	TScriptInterface<ITargetInterface> GetCurrentTarget() const { return Target; }
-	
+
+	// * EVENTS * //
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetChanged, bool, bIsTarget);
+
 	UPROPERTY(BlueprintAssignable, Category="Target")
 	FOnTargetChanged OnTargetChanged;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelected);
+
+	UPROPERTY(BlueprintAssignable, Category="Target")
+	FOnSelected OnSelected;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
+
+	UPROPERTY(BlueprintAssignable, Category="Target")
+	FOnDeselected OnDeselected;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLostFocus);
+
+	UPROPERTY(BlueprintAssignable, Category="Target")
+	FOnLostFocus OnLostFocus;
+
+
 protected:
 	virtual void BeginPlay() override;
-	virtual void NotifyTargetChange(bool bIsTarget);
-	void RaycastTargetInterface();
 
 private:
 	TWeakObjectPtr<APlayerController> PlayerController;

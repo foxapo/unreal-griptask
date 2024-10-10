@@ -15,21 +15,12 @@ class GRIPTASK_API UAttributeComponent : public UActorComponent
 
 public:
 	UAttributeComponent();
-	FName GetCharacterStatsId() const { return CharacterStatsId; }
-	void SetBaseStats(const FCharacterStats* Stats);
-	FCharacterStats GetBaseStats() const { return BaseStats; }
-	void RegenerateMana(float DeltaTime);
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	float GetHealth() const { return CurrentHealth; }
-	float GetMana() const { return CurrentMana; }
-	float GetMaxHealth() const { return MaxHealth; }
-	float GetMaxMana() const { return MaxMana; }
-	float GetNaturalManaRegen() const { return NaturalManaRegen; }
+	void SetBaseStats(const FCharacterStats* Stats);
+	void RegenerateMana(float DeltaTime);
 	void ConsumeMana(float Value);
 	FName GetId() const;
 
-	// EVENTS
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, Health);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChanged, float, Mana);
 
@@ -38,15 +29,21 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Attributes")
 	FOnManaChanged OnManaChanged;
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-	// Character stat id
-	UPROPERTY(EditAnywhere, Category="Attributes")
-	FName CharacterStatsId;
+	FORCEINLINE FCharacterStats GetBaseStats() const { return BaseStats; }
+	FORCEINLINE FName GetCharacterStatsId() const { return CharacterStatsId; }
+	FORCEINLINE float GetHealth() const { return CurrentHealth; }
+	FORCEINLINE float GetMana() const { return CurrentMana; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetMaxMana() const { return MaxMana; }
+	FORCEINLINE float GetNaturalManaRegen() const { return NaturalManaRegen; }
 
+protected:
+	virtual void BeginPlay() override;
 	void NotifyHealthChanged() const;
 	void NotifyManaChanged() const;
+
+	UPROPERTY(EditAnywhere, Category="Attributes")
+	FName CharacterStatsId;
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category="Attributes", meta = (AllowPrivateAccess = "true"))

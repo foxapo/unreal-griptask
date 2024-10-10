@@ -15,7 +15,7 @@ struct FCharacterStats : public FTableRowBase
 	float MaxMana = 10;
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
 	float NaturalManaRegen = 1;
-	UPROPERTY(EditAnywhere, Category = "Base Stats")
+	UPROPERTY(EditAnywhere, Category = "Base Stats")	
 	UTexture2D* CharacterSprite;
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
 	FString CharacterName;

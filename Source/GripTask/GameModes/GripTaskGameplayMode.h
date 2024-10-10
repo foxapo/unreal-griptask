@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "GripTask/Data/FQuestData.h"
 #include "GripTaskGameplayMode.generated.h"
 
 struct FCharacterStats;
@@ -19,8 +20,12 @@ class GRIPTASK_API AGripTaskGameplayMode : public AGameMode
 public:
 	virtual void BeginPlay() override;
 	FCharacterStats* GetCharacterStats(FName RowName) const;
+	TArray<FQuestData> GetQuestData() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay")
 	UDataTable* CharacterStatsDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay")
+	UDataTable* QuestDataTable;
 };

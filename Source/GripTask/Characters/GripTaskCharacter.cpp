@@ -15,7 +15,9 @@
 #include "GripTask/Components/AttributeComponent.h"
 #include "GripTask/Components/TargetComponent.h"
 #include "GripTask/Core/DebugMacros.h"
+#include "GripTask/Core/GlobalUtils.h"
 #include "GripTask/GameModes/GripTaskGameplayMode.h"
+#include "GripTask/UI/HUDs/GameplayHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -71,7 +73,7 @@ UTargetComponent* AGripTaskCharacter::GetActorTargetComponent()
 	return TargetComponent;
 }
 
-UAttributeComponent* AGripTaskCharacter::GetAttributeComponent()
+UAttributeComponent* AGripTaskCharacter::GetAttributeComponent() 
 {
 	return AttributeComponent;
 }
@@ -158,9 +160,8 @@ void AGripTaskCharacter::LeftMouseClicked(const FInputActionValue& Value)
 {
 	if (Value.Get<bool>())
 	{
-		DEBUG_PRINT("Left mouse clicked");
 		if (TargetComponent)
-			TargetComponent->LeftMouseClicked();
+			TargetComponent->RaycastTargetInterface();
 	}
 }
 
@@ -208,8 +209,8 @@ void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Look);
-		EnhancedInputComponent->BindAction(LeftMouseClickAction, ETriggerEvent::Triggered, this,
-		                                   &AGripTaskCharacter::LeftMouseClicked);
+		EnhancedInputComponent->BindAction(LeftMouseClickAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::LeftMouseClicked);
+		EnhancedInputComponent->BindAction(ToggleQuestAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::ToggleQuestLog);
 	}
 	else
 	{
@@ -233,7 +234,6 @@ void AGripTaskCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -257,4 +257,10 @@ void AGripTaskCharacter::Look(const FInputActionValue& Value)
 		// Rotate the minimap camera
 		MinimapCapture->SetWorldRotation(FRotator(-90.0f, GetControlRotation().Yaw, 0.0f));
 	}
+}
+
+void AGripTaskCharacter::ToggleQuestLog()
+{
+	if (GetWorld())
+		GlobalUtils::GetGameplayHUD(GetWorld())->ToggleQuestLog();
 }

@@ -2,6 +2,8 @@
 
 
 #include "GameplayLayoutWidget.h"
+
+#include "Components/CanvasPanel.h"
 #include "Components/NamedSlot.h"
 #include "GripTask/Characters/GripTaskCharacter.h"
 #include "GripTask/Components/TargetComponent.h"
@@ -10,6 +12,7 @@
 #include "Widgets/MinimapWidget.h"
 #include "Widgets/UnitFrameWidget.h"
 #include "GripTask/Interfaces/TargetInterface.h"
+#include "Widgets/QuestMenu.h"
 
 void UGameplayLayoutWidget::NativeConstruct()
 {
@@ -20,6 +23,18 @@ void UGameplayLayoutWidget::NativeConstruct()
 	}
 
 	InitializePlayerWidgets();
+}
+
+void UGameplayLayoutWidget::SetQuestMenu(const bool bQuestMenuVisible) const
+{
+	if (QuestMenuWidget)
+	{
+		QuestMenuWidget->SetVisibility(bQuestMenuVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	}
+	else
+	{
+		DEBUG_PRINT("Quest menu widget not found");
+	}
 }
 
 void UGameplayLayoutWidget::InitializePlayerWidgets()
@@ -42,15 +57,15 @@ void UGameplayLayoutWidget::InitializePlayerWidgets()
 	OnTargetChanged(false);
 	if (PlayerTargetInterface->GetActorTargetComponent())
 	{
-		PlayerTargetInterface->GetActorTargetComponent()->SetPlayerController(
-			UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		PlayerTargetInterface->GetActorTargetComponent()->OnTargetChanged.AddDynamic(
-			this, &UGameplayLayoutWidget::OnTargetChanged);
+		PlayerTargetInterface->GetActorTargetComponent()->SetPlayerController(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		PlayerTargetInterface->GetActorTargetComponent()->OnTargetChanged.AddDynamic(this, &UGameplayLayoutWidget::OnTargetChanged);
 	}
 	else
 	{
 		DEBUG_PRINT("Player target component not found");
 	}
+
+	InitializeQuestMenu();
 }
 
 void UGameplayLayoutWidget::SetPlayerFrame(TScriptInterface<ITargetInterface> Target)
@@ -89,6 +104,22 @@ void UGameplayLayoutWidget::InitializePlayerUnitFrameWidget()
 
 	PlayerUnitFrameWidget = CreateWidget<UUnitFrameWidget>(GetWorld(), PlayerUnitFrameClass);
 	PlayerUnitFrameSlot->AddChild(PlayerUnitFrameWidget);
+}
+
+void UGameplayLayoutWidget::InitializeQuestMenu()
+{
+	if (!QuestMenuClass)
+	{
+		DEBUG_PRINT("Quest menu widget class not set");
+		return;
+	}
+
+	QuestMenuWidget = CreateWidget<UQuestMenu>(GetWorld(), QuestMenuClass);
+	// PlayerQuestLogSlot->AddChild(QuestMenuWidget);
+	// Add QuestMenuWidget to the viewport
+	PlayerQuestLogSlot->AddChild(QuestMenuWidget);
+	// QuestMenuWidget->SetDesiredSizeInViewport(FVector2D(640.0f, 480.0f));
+	QuestMenuWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGameplayLayoutWidget::InitializeTargetUnitFrameWidget()

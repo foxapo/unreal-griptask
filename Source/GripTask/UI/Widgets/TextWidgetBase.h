@@ -14,7 +14,7 @@ class GRIPTASK_API UTextWidgetBase : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* TextBlock;
 
 	// Function to set text

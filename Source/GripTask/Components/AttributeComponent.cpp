@@ -36,7 +36,6 @@ void UAttributeComponent::SetBaseStats(const FCharacterStats* Stats)
 	NotifyManaChanged();
 }
 
-
 void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                         FActorComponentTickFunction* ThisTickFunction)
 {
