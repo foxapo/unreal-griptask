@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "GripTask/Interfaces/UTargetInterface.h"
+#include "GripTask/Interfaces/AttributeInterface.h"
+#include "GripTask/Interfaces/TargetInterface.h"
 #include "Logging/LogMacros.h"
 #include "GripTaskCharacter.generated.h"
 
@@ -20,8 +21,9 @@ class AGripTaskGameplayMode;
 class USceneCaptureComponent2D;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
 UCLASS(config=Game)
-class AGripTaskCharacter : public ACharacter, public ITargetInterface
+class AGripTaskCharacter : public ACharacter, public ITargetInterface, public IAttributeInterface
 {
 	GENERATED_BODY()
 
@@ -46,24 +48,25 @@ class AGripTaskCharacter : public ACharacter, public ITargetInterface
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LeftMouseClickAction;
 
-	/* ATTRIBUTE COMPONENT */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
-	UAttributeComponent* AttributeComponent;
-	/* ACTOR TARGET COMPONENT */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Target, meta = (AllowPrivateAccess = "true"))
-	UTargetComponent* TargetComponent;
 	/* MINIMAP */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* MinimapCameraBoom;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
 	USceneCaptureComponent2D* MinimapCapture;
 
+	/* ATTRIBUTE COMPONENT */
+	UPROPERTY(VisibleAnywhere, Transient)
+	UAttributeComponent* AttributeComponent;
+	/* ACTOR TARGET COMPONENT */
+	UPROPERTY(VisibleAnywhere, Transient)
+	UTargetComponent* TargetComponent;
+
 public:
 	AGripTaskCharacter();
-	virtual bool IsTarget() const override;
+	virtual bool IsTarget() override;
 	virtual UTargetComponent* GetActorTargetComponent() override;
 	virtual UAttributeComponent* GetAttributeComponent() override;
-	void InitializeComponents() const;
+	virtual void SetupCharacterStats(FName Id) override;
 
 protected:
 	void Move(const FInputActionValue& Value);
@@ -73,6 +76,7 @@ protected:
 	virtual void Jump() override;
 	virtual void LeftMouseClicked(const FInputActionValue& Value);
 	virtual void Tick(float DeltaTime) override;
+	virtual void PostInitializeComponents() override;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -81,7 +85,6 @@ public:
 	FORCEINLINE USceneCaptureComponent2D* GetMinimapCamera() const { return MinimapCapture; }
 
 protected:
-	void SetupCharacterStats(FName Id) const;
 	void JumpImpl();
 	void SetupMinimapCamera();
 };

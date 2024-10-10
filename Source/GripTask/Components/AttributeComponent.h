@@ -17,6 +17,7 @@ public:
 	UAttributeComponent();
 	FName GetCharacterStatsId() const { return CharacterStatsId; }
 	void SetBaseStats(const FCharacterStats* Stats);
+	FCharacterStats GetBaseStats() const { return BaseStats; }
 	void RegenerateMana(float DeltaTime);
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	

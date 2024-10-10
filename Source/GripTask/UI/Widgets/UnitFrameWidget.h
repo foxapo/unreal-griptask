@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UnitFrameWidget.generated.h"
 
+class UImage;
+class UTextBlock;
 class ITargetInterface;
 class UAttributeComponent;
 class UProgressBar;
@@ -21,6 +23,8 @@ class GRIPTASK_API UUnitFrameWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	void Toggle(bool State);
+	void UnsubscribeTarget();
+	void SubscribeTarget();
 	void InitTarget(TScriptInterface<ITargetInterface> Target);
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -29,6 +33,14 @@ protected:
 	UProgressBar* HealthBar;
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ManaBar;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* NameText;
+	UPROPERTY(meta = (BindWidget))
+	UImage* PlayerPortrait;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HealthValue;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ManaValue;
 
 private:
 	TScriptInterface<ITargetInterface> CurrentTarget;
@@ -37,6 +49,11 @@ private:
 	void UpdateHealth(float Health);
 	UFUNCTION()
 	void UpdateMana(float Mana);
+	UFUNCTION()
+	void UpdateName(const FString& Name) const;
+	UFUNCTION()
+	void UpdatePortrait(UTexture2D* Portrait) const;
+
 
 	// Interpolation of the bar change
 	float CurrentHealthPercent = 0;

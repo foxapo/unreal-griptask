@@ -5,6 +5,8 @@
 
 #include "GripTask/Components/AttributeComponent.h"
 #include "GripTask/Components/TargetComponent.h"
+#include "GripTask/Core/DebugMacros.h"
+#include "GripTask/GameModes/GripTaskGameplayMode.h"
 
 
 // Sets default values
@@ -16,7 +18,7 @@ ATargetDummyActor::ATargetDummyActor()
 	TargetComponent = CreateDefaultSubobject<UTargetComponent>(TEXT("TargetComponent"));
 }
 
-bool ATargetDummyActor::IsTarget() const
+bool ATargetDummyActor::IsTarget()
 {
 	return true;
 }
@@ -35,6 +37,26 @@ UAttributeComponent* ATargetDummyActor::GetAttributeComponent()
 void ATargetDummyActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!AttributeComponent)
+	{
+		DEBUG_PRINT("AttributeComponent not set");
+	}
+	else
+	{
+		SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
+	}
+}
+
+
+void ATargetDummyActor::SetupCharacterStats(FName Id)
+{
+	if (const AGripTaskGameplayMode* GameMode = Cast<AGripTaskGameplayMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if (FCharacterStats* Stats = GameMode->GetCharacterStats(Id))
+		{
+			AttributeComponent->SetBaseStats(Stats);
+		}
+	}
 }
 
 // Called every frame

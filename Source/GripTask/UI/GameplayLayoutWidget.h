@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GripTask/Interfaces/UTargetInterface.h"
+#include "GripTask/Interfaces/TargetInterface.h"
 #include "GameplayLayoutWidget.generated.h"
 
 class AGripTaskCharacter;
@@ -64,13 +64,13 @@ private:
 	void InitializePlayerUnitFrameWidget();
 
 	UFUNCTION()
-	void SetPlayerFrame(const TScriptInterface<ITargetInterface>& Target) const;
+	void SetPlayerFrame(TScriptInterface<ITargetInterface> Target);
 
 	UFUNCTION()
-	void SetTargetFrame(const TScriptInterface<ITargetInterface>& Target) const;
+	void SetTargetFrame(TScriptInterface<ITargetInterface> Target);
 
 	UFUNCTION()
-	void OnTargetChanged(bool bIsTarget) const;
+	void OnTargetChanged(bool bIsTarget);
 
 	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
 	class UUnitFrameWidget* PlayerUnitFrameWidget;

@@ -2,7 +2,7 @@
 
 #include "UObject/Interface.h"
 #include "CoreMinimal.h"
-#include "UTargetInterface.generated.h"
+#include "TargetInterface.generated.h"
 
 class UTargetComponent;
 class UAttributeComponent;
@@ -18,7 +18,7 @@ class ITargetInterface
 	GENERATED_BODY()
 
 public:
-	virtual bool IsTarget() const;
-	virtual UAttributeComponent* GetAttributeComponent();
-	virtual UTargetComponent* GetActorTargetComponent();
+	virtual bool IsTarget() = 0;
+	virtual UAttributeComponent* GetAttributeComponent() = 0;
+	virtual UTargetComponent* GetActorTargetComponent() = 0;
 };

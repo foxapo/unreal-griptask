@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GripTask/Interfaces/UTargetInterface.h"
+#include "GripTask/Interfaces/TargetInterface.h"
 #include "TargetComponent.generated.h"
 
 

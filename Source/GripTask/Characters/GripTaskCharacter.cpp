@@ -59,31 +59,9 @@ void AGripTaskCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-	InitializeComponents();
 }
 
-void AGripTaskCharacter::InitializeComponents() const
-{
-	if (!AttributeComponent)
-	{
-		DEBUG_PRINT("AttributeComponent not set");
-	}
-	else
-	{
-		SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
-	}
-
-	if (!TargetComponent)
-	{
-		DEBUG_PRINT("TargetComponent not set");
-	}
-	else
-	{
-		TargetComponent->SetPlayerController(Cast<APlayerController>(GetController()));
-	}
-}
-
-bool AGripTaskCharacter::IsTarget() const
+bool AGripTaskCharacter::IsTarget()
 {
 	return true;
 }
@@ -96,6 +74,17 @@ UTargetComponent* AGripTaskCharacter::GetActorTargetComponent()
 UAttributeComponent* AGripTaskCharacter::GetAttributeComponent()
 {
 	return AttributeComponent;
+}
+
+void AGripTaskCharacter::SetupCharacterStats(FName Id)
+{
+	if (const AGripTaskGameplayMode* GameMode = Cast<AGripTaskGameplayMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if (FCharacterStats* Stats = GameMode->GetCharacterStats(Id))
+		{
+			AttributeComponent->SetBaseStats(Stats);
+		}
+	}
 }
 
 /**
@@ -170,7 +159,7 @@ void AGripTaskCharacter::LeftMouseClicked(const FInputActionValue& Value)
 	if (Value.Get<bool>())
 	{
 		DEBUG_PRINT("Left mouse clicked");
-		if(TargetComponent)
+		if (TargetComponent)
 			TargetComponent->LeftMouseClicked();
 	}
 }
@@ -178,6 +167,28 @@ void AGripTaskCharacter::LeftMouseClicked(const FInputActionValue& Value)
 void AGripTaskCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AGripTaskCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (!AttributeComponent)
+	{
+		DEBUG_PRINT("AttributeComponent not set");
+	}
+	else
+	{
+		SetupCharacterStats(AttributeComponent->GetCharacterStatsId());
+	}
+
+	if (!TargetComponent)
+	{
+		DEBUG_PRINT("TargetComponent not set");
+	}
+	else
+	{
+		TargetComponent->SetPlayerController(Cast<APlayerController>(GetController()));
+	}
 }
 
 void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -245,16 +256,5 @@ void AGripTaskCharacter::Look(const FInputActionValue& Value)
 
 		// Rotate the minimap camera
 		MinimapCapture->SetWorldRotation(FRotator(-90.0f, GetControlRotation().Yaw, 0.0f));
-	}
-}
-
-void AGripTaskCharacter::SetupCharacterStats(const FName Id) const
-{
-	if (const AGripTaskGameplayMode* GameMode = Cast<AGripTaskGameplayMode>(GetWorld()->GetAuthGameMode()))
-	{
-		if (FCharacterStats* Stats = GameMode->GetCharacterStats(Id))
-		{
-			AttributeComponent->SetBaseStats(Stats);
-		}
 	}
 }

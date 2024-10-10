@@ -9,7 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/MinimapWidget.h"
 #include "Widgets/UnitFrameWidget.h"
-#include "GripTask/Interfaces/UTargetInterface.h"
+#include "GripTask/Interfaces/TargetInterface.h"
 
 void UGameplayLayoutWidget::NativeConstruct()
 {
@@ -39,29 +39,41 @@ void UGameplayLayoutWidget::InitializePlayerWidgets()
 	PlayerTargetInterface.SetObject(PlayerCharacter.Get());
 	PlayerTargetInterface.SetInterface(Cast<ITargetInterface>(PlayerCharacter));
 	SetPlayerFrame(PlayerTargetInterface);
+	OnTargetChanged(false);
+	if (PlayerTargetInterface->GetActorTargetComponent())
+	{
+		PlayerTargetInterface->GetActorTargetComponent()->SetPlayerController(
+			UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		PlayerTargetInterface->GetActorTargetComponent()->OnTargetChanged.AddDynamic(
+			this, &UGameplayLayoutWidget::OnTargetChanged);
+	}
+	else
+	{
+		DEBUG_PRINT("Player target component not found");
+	}
 }
 
-void UGameplayLayoutWidget::SetPlayerFrame(const TScriptInterface<ITargetInterface>& Target) const
+void UGameplayLayoutWidget::SetPlayerFrame(TScriptInterface<ITargetInterface> Target)
 {
 	PlayerUnitFrameWidget->InitTarget(Target);
 }
 
-void UGameplayLayoutWidget::SetTargetFrame(const TScriptInterface<ITargetInterface>& Target) const
+void UGameplayLayoutWidget::SetTargetFrame(TScriptInterface<ITargetInterface> Target)
 {
 	TargetUnitFrameWidget->InitTarget(Target);
 }
 
-void UGameplayLayoutWidget::OnTargetChanged(bool bIsTarget) const
+void UGameplayLayoutWidget::OnTargetChanged(bool bIsTarget)
 {
 	if (bIsTarget)
 	{
 		SetTargetFrame(PlayerCharacter->GetActorTargetComponent()->GetCurrentTarget());
-		TargetUnitFrameWidget->Toggle(true);
+		TargetUnitFrameWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
+		TargetUnitFrameWidget->SetVisibility(ESlateVisibility::Hidden);
 		SetTargetFrame(nullptr);
-		TargetUnitFrameWidget->Toggle(false);
 	}
 }
 

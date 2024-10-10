@@ -18,4 +18,11 @@ struct FCharacterStats : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, Category = "Base Stats")
 	float NaturalManaRegen = 1;
+
+	// Sprite for the character
+	UPROPERTY(EditAnywhere, Category = "Base Stats")
+	UTexture2D* CharacterSprite;
+
+	UPROPERTY(EditAnywhere, Category = "Base Stats")
+	FString CharacterName;
 };

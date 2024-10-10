@@ -4,29 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GripTask/Interfaces/UTargetInterface.h"
+#include "GripTask/Interfaces/AttributeInterface.h"
+#include "GripTask/Interfaces/TargetInterface.h"
 #include "TargetDummyActor.generated.h"
 
 class UAttributeComponent;
 class UTargetComponent;
 
 UCLASS()
-class GRIPTASK_API ATargetDummyActor : public AActor, public ITargetInterface
+class GRIPTASK_API ATargetDummyActor : public AActor, public ITargetInterface, public IAttributeInterface
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Transient)
 	UAttributeComponent* AttributeComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Target, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Transient)
 	UTargetComponent* TargetComponent;
 
 public:
 	// Sets default values for this actor's properties
 	ATargetDummyActor();
-	virtual bool IsTarget() const override;
-	virtual UTargetComponent* GetActorTargetComponent() override; 
+	virtual bool IsTarget() override;
+	virtual UTargetComponent* GetActorTargetComponent() override;
 	virtual UAttributeComponent* GetAttributeComponent() override;
+	virtual void SetupCharacterStats(FName Id) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,5 +39,4 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	
 };

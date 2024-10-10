@@ -3,10 +3,12 @@
 
 #include "UnitFrameWidget.h"
 #include "CoreMinimal.h"
+#include "Components/Image.h"
 #include "Delegates/DelegateCombinations.h"
 #include "GripTask/Characters/GripTaskCharacter.h"
 #include "GripTask/Components/AttributeComponent.h"
 #include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 void UUnitFrameWidget::NativeConstruct()
 {
@@ -29,23 +31,42 @@ void UUnitFrameWidget::Toggle(bool State)
 	}
 }
 
-void UUnitFrameWidget::InitTarget(TScriptInterface<ITargetInterface> Target)
+void UUnitFrameWidget::UnsubscribeTarget()
 {
-	if (Target == nullptr)
+	if (CurrentTarget && CurrentTarget->GetAttributeComponent())
 	{
-		bIsPlayer = false;
-		CurrentTarget = nullptr;
-		return;
+		CurrentTarget->GetAttributeComponent()->OnHealthChanged.RemoveDynamic(this, &UUnitFrameWidget::UpdateHealth);
+		CurrentTarget->GetAttributeComponent()->OnManaChanged.RemoveDynamic(this, &UUnitFrameWidget::UpdateMana);
 	}
+	CurrentTarget = nullptr;
+}
 
-	CurrentTarget = Target;
-	if (CurrentTarget->GetAttributeComponent())
+void UUnitFrameWidget::SubscribeTarget()
+{
+	if (CurrentTarget && CurrentTarget->GetAttributeComponent())
 	{
 		bIsPlayer = true;
 		CurrentTarget->GetAttributeComponent()->OnHealthChanged.AddDynamic(this, &UUnitFrameWidget::UpdateHealth);
 		CurrentTarget->GetAttributeComponent()->OnManaChanged.AddDynamic(this, &UUnitFrameWidget::UpdateMana);
 		UpdateHealth(CurrentTarget->GetAttributeComponent()->GetMaxHealth());
 		UpdateMana(CurrentTarget->GetAttributeComponent()->GetMaxMana());
+		UpdateName(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterName);
+		UpdatePortrait(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterSprite);
+	}
+}
+
+void UUnitFrameWidget::InitTarget(TScriptInterface<ITargetInterface> Target)
+{
+	if (Target == nullptr)
+	{
+		bIsPlayer = false;
+		UnsubscribeTarget();
+	}
+	else
+	{
+		UnsubscribeTarget();
+		CurrentTarget = Target;
+		SubscribeTarget();
 	}
 }
 
@@ -73,20 +94,44 @@ void UUnitFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	}
 }
 
-void UUnitFrameWidget::UpdateHealth(float Health)
+void UUnitFrameWidget::UpdateHealth(const float Health)
 {
 	if (!bIsPlayer)
 	{
 		return;
 	}
 	TargetHealthPercent = Health / CurrentTarget->GetAttributeComponent()->GetMaxHealth();
+	HealthValue->SetText(FText::FromString(FString::Printf(
+		TEXT("%d / %d"), static_cast<int>(Health),
+		static_cast<int>(CurrentTarget->GetAttributeComponent()->GetMaxHealth()))));;
 }
 
-void UUnitFrameWidget::UpdateMana(float Mana)
+void UUnitFrameWidget::UpdateMana(const float Mana)
 {
 	if (!bIsPlayer)
 	{
 		return;
 	}
 	TargetManaPercent = Mana / CurrentTarget->GetAttributeComponent()->GetMaxMana();
+	ManaValue->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), static_cast<int>(Mana),
+	                                                     static_cast<int>(CurrentTarget->GetAttributeComponent()->
+		                                                     GetMaxMana()))));
+}
+
+void UUnitFrameWidget::UpdateName(const FString& Name) const
+{
+	if (!bIsPlayer)
+	{
+		return;
+	}
+	NameText->SetText(FText::FromString(Name));
+}
+
+void UUnitFrameWidget::UpdatePortrait(UTexture2D* Portrait) const
+{
+	if (!bIsPlayer)
+	{
+		return;
+	}
+	PlayerPortrait->SetBrushFromTexture(Portrait);
 }
