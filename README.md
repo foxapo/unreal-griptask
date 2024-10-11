@@ -2,7 +2,7 @@
 
 Developed with Unreal Engine 5
 
-![img.png](img.png)
+![image.jpg](image.jpg)
 
 ## Key Bindings
 
