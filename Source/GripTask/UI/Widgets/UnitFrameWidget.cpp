@@ -52,8 +52,8 @@ void UUnitFrameWidget::SubscribeTarget()
 		bIsPlayer = true;
 		CurrentTarget->GetAttributeComponent()->OnHealthChanged.AddDynamic(this, &UUnitFrameWidget::UpdateHealth);
 		CurrentTarget->GetAttributeComponent()->OnManaChanged.AddDynamic(this, &UUnitFrameWidget::UpdateMana);
-		UpdateHealth(CurrentTarget->GetAttributeComponent()->GetMaxHealth());
-		UpdateMana(CurrentTarget->GetAttributeComponent()->GetMaxMana());
+		UpdateHealth(CurrentTarget->GetAttributeComponent()->GetHealth());
+		UpdateMana(CurrentTarget->GetAttributeComponent()->GetMana());
 		UpdateName(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterName);
 		UpdatePortrait(CurrentTarget->GetAttributeComponent()->GetBaseStats().CharacterSprite);
 		UpdateLevel(CurrentTarget->GetAttributeComponent()->GetBaseStats().Level);

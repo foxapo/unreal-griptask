@@ -51,6 +51,18 @@ class AGripTaskCharacter : public ACharacter, public ITargetInterface, public IA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleQuestAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleInventoryAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DamageAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* HealAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SelectSelfAction;
+
 	/* MINIMAP */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* MinimapCameraBoom;
@@ -71,6 +83,8 @@ public:
 	virtual UAttributeComponent* GetAttributeComponent() override;
 	virtual void SetupCharacterStats(FName Id) override;
 	void ToggleQuestLog();
+	void ToggleInventory();
+	void SelectSelf();
 
 protected:
 	void Move(const FInputActionValue& Value);
@@ -91,4 +105,7 @@ public:
 protected:
 	void JumpImpl();
 	void SetupMinimapCamera();
+	void InitiateDamage(const FInputActionValue& Value);
+	void InitiateHeal(const FInputActionValue& Value);
+	
 };

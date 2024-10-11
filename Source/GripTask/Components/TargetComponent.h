@@ -19,6 +19,8 @@ public:
 	void SetTarget(UObject* NewObject);
 	void UnsetTarget();
 	void RaycastTargetInterface();
+	void DoDamage() const;
+	void DoHeal() const;
 	TScriptInterface<ITargetInterface> GetCurrentTarget() const { return Target; }
 
 	// * EVENTS * //
@@ -43,6 +45,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Target")
 	FOnLostFocus OnLostFocus;
 
+	FORCEINLINE bool HasTarget() const { return Target != nullptr; }
 
 protected:
 	virtual void BeginPlay() override;

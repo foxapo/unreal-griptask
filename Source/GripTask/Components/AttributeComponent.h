@@ -19,6 +19,8 @@ public:
 	void SetBaseStats(const FCharacterStats* Stats);
 	void RegenerateMana(float DeltaTime);
 	void ConsumeMana(float Value);
+	void ApplyDamage(float Value);
+	void ApplyHeal(float Value);
 	FName GetId() const;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, Health);

@@ -73,7 +73,7 @@ UTargetComponent* AGripTaskCharacter::GetActorTargetComponent()
 	return TargetComponent;
 }
 
-UAttributeComponent* AGripTaskCharacter::GetAttributeComponent() 
+UAttributeComponent* AGripTaskCharacter::GetAttributeComponent()
 {
 	return AttributeComponent;
 }
@@ -151,6 +151,7 @@ void AGripTaskCharacter::SetupMinimapCamera()
 	MinimapCapture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
 }
 
+
 void AGripTaskCharacter::Jump()
 {
 	JumpImpl();
@@ -209,8 +210,18 @@ void AGripTaskCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::Look);
-		EnhancedInputComponent->BindAction(LeftMouseClickAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::LeftMouseClicked);
-		EnhancedInputComponent->BindAction(ToggleQuestAction, ETriggerEvent::Triggered, this, &AGripTaskCharacter::ToggleQuestLog);
+		EnhancedInputComponent->BindAction(LeftMouseClickAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::LeftMouseClicked);
+		EnhancedInputComponent->BindAction(ToggleQuestAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::ToggleQuestLog);
+		EnhancedInputComponent->BindAction(DamageAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::InitiateDamage);
+		EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::InitiateHeal);
+		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::ToggleInventory);
+		EnhancedInputComponent->BindAction(SelectSelfAction, ETriggerEvent::Triggered, this,
+		                                   &AGripTaskCharacter::SelectSelf);
 	}
 	else
 	{
@@ -259,8 +270,72 @@ void AGripTaskCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+// FOR TESTING PURPOSES THIS IS NOW HERE BUT IT WOULD BE IN SOME SEPARATE COMBAT RELATED COMPONENT OR SOMETHING
+
+void AGripTaskCharacter::InitiateDamage(const FInputActionValue& Value)
+{
+	if (!Value.Get<bool>())
+	{
+		return;
+	}
+
+	if (!TargetComponent->HasTarget())
+	{
+		DEBUG_PRINT("Invalid target");
+		return;
+	}
+
+	if (AttributeComponent->GetMana() >= 35)
+	{
+		AttributeComponent->ConsumeMana(35);
+		TargetComponent->DoDamage();
+	}
+	else
+	{
+		DEBUG_PRINT("Not enough mana to damage");
+	}
+}
+
+void AGripTaskCharacter::InitiateHeal(const FInputActionValue& Value)
+{
+	if (!Value.Get<bool>())
+	{
+		return;
+	}
+
+	if (!TargetComponent->HasTarget())
+	{
+		DEBUG_PRINT("Invalid target");
+		return;
+	}
+
+	if (AttributeComponent->GetMana() >= 40)
+	{
+		AttributeComponent->ConsumeMana(40);
+		TargetComponent->DoHeal();
+	}
+	else
+	{
+		DEBUG_PRINT("Not enough mana to heal");
+	}
+}
+
 void AGripTaskCharacter::ToggleQuestLog()
 {
 	if (GetWorld())
 		GlobalUtils::GetGameplayHUD(GetWorld())->ToggleQuestLog();
+}
+
+void AGripTaskCharacter::ToggleInventory()
+{
+	if (GetWorld())
+		GlobalUtils::GetGameplayHUD(GetWorld())->ToggleInventory();
+}
+
+void AGripTaskCharacter::SelectSelf()
+{
+	if (GetActorTargetComponent())
+	{
+		GetActorTargetComponent()->SetTarget(this);
+	}
 }

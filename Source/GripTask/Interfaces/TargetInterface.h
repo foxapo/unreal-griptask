@@ -21,5 +21,4 @@ public:
 	virtual bool IsTarget() = 0;
 	virtual UAttributeComponent* GetAttributeComponent() = 0;
 	virtual UTargetComponent* GetActorTargetComponent() = 0;
-	
 };

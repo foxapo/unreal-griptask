@@ -12,6 +12,7 @@
 #include "Widgets/MinimapWidget.h"
 #include "Widgets/UnitFrameWidget.h"
 #include "GripTask/Interfaces/TargetInterface.h"
+#include "Widgets/InventoryMenu.h"
 #include "Widgets/QuestMenu.h"
 
 void UGameplayLayoutWidget::NativeConstruct()
@@ -37,24 +38,20 @@ void UGameplayLayoutWidget::SetQuestMenu(const bool bQuestMenuVisible) const
 	}
 }
 
-void UGameplayLayoutWidget::InitializePlayerWidgets()
+void UGameplayLayoutWidget::SetInventoryMenu(const bool bInventoryMenuVisible) const
 {
-	PlayerCharacter = Cast<AGripTaskCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (!PlayerCharacter.IsValid())
+	if (InventoryMenuWidget)
 	{
-		DEBUG_PRINT("Player character not found");
-		return;
+		InventoryMenuWidget->SetVisibility(bInventoryMenuVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
+	else
+	{
+		DEBUG_PRINT("Inventory menu widget not found");
+	}
+}
 
-	InitializePlayerUnitFrameWidget();
-	InitializeTargetUnitFrameWidget();
-	InitializeMinimapWidget();
-
-	TScriptInterface<ITargetInterface> PlayerTargetInterface;
-	PlayerTargetInterface.SetObject(PlayerCharacter.Get());
-	PlayerTargetInterface.SetInterface(Cast<ITargetInterface>(PlayerCharacter));
-	SetPlayerFrame(PlayerTargetInterface);
-	OnTargetChanged(false);
+void UGameplayLayoutWidget::SubscribeTargetChange(TScriptInterface<ITargetInterface> PlayerTargetInterface)
+{
 	if (PlayerTargetInterface->GetActorTargetComponent())
 	{
 		PlayerTargetInterface->GetActorTargetComponent()->SetPlayerController(UGameplayStatics::GetPlayerController(GetWorld(), 0));
@@ -64,8 +61,31 @@ void UGameplayLayoutWidget::InitializePlayerWidgets()
 	{
 		DEBUG_PRINT("Player target component not found");
 	}
+}
 
+void UGameplayLayoutWidget::InitializePlayerWidgets()
+{
+	PlayerCharacter = Cast<AGripTaskCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!PlayerCharacter.IsValid())
+	{
+		DEBUG_PRINT("Player character not found");
+		return;
+	}
+
+	// UNIT FRAMES
+	InitializePlayerUnitFrameWidget();
+	InitializeTargetUnitFrameWidget();
+	TScriptInterface<ITargetInterface> PlayerTargetInterface;
+	PlayerTargetInterface.SetObject(PlayerCharacter.Get());
+	PlayerTargetInterface.SetInterface(Cast<ITargetInterface>(PlayerCharacter));
+	SetPlayerFrame(PlayerTargetInterface);
+	OnTargetChanged(false); // Hide the target frame on startup
+	SubscribeTargetChange(PlayerTargetInterface);
+	// MENUS
 	InitializeQuestMenu();
+	InitializeInventoryMenu();
+	// MINIMAP
+	InitializeMinimapWidget();
 }
 
 void UGameplayLayoutWidget::SetPlayerFrame(TScriptInterface<ITargetInterface> Target)
@@ -115,11 +135,24 @@ void UGameplayLayoutWidget::InitializeQuestMenu()
 	}
 
 	QuestMenuWidget = CreateWidget<UQuestMenu>(GetWorld(), QuestMenuClass);
-	// PlayerQuestLogSlot->AddChild(QuestMenuWidget);
-	// Add QuestMenuWidget to the viewport
 	PlayerQuestLogSlot->AddChild(QuestMenuWidget);
+	// CanvasPanel->AddChild(QuestMenuWidget);
+	// QuestMenuWidget->SetAlignmentInViewport(FVector2D(0.0f, 0.0f));
 	// QuestMenuWidget->SetDesiredSizeInViewport(FVector2D(640.0f, 480.0f));
 	QuestMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UGameplayLayoutWidget::InitializeInventoryMenu()
+{
+	if (!InventoryMenuClass)
+	{
+		DEBUG_PRINT("Inventory menu widget class not set");
+		return;
+	}
+
+	InventoryMenuWidget = CreateWidget<UInventoryMenu>(GetWorld(), InventoryMenuClass);
+	InventoryMenuSlot->AddChild(InventoryMenuWidget);
+	InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGameplayLayoutWidget::InitializeTargetUnitFrameWidget()

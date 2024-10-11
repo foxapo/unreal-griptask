@@ -32,6 +32,7 @@ public:
 
 	virtual void BeginPlay() override;
 	void ToggleQuestLog();
+	void ToggleInventory();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
@@ -41,4 +42,5 @@ protected:
 
 private:
 	bool bQuestMenuVisible = false;
+	bool bInventoryMenuVisible = false;
 };

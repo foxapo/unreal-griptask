@@ -32,3 +32,12 @@ void AGameplayHUD::ToggleQuestLog()
 		GameplayLayoutWidget->SetQuestMenu(bQuestMenuVisible);
 	}
 }
+
+void AGameplayHUD::ToggleInventory()
+{
+	bInventoryMenuVisible = !bInventoryMenuVisible;
+	if (GameplayLayoutWidget)
+	{
+		GameplayLayoutWidget->SetInventoryMenu(bInventoryMenuVisible);
+	}
+}

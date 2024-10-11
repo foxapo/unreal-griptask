@@ -2,8 +2,8 @@
 
 #include "TargetComponent.h"
 
+#include "AttributeComponent.h"
 #include "GripTask/Characters/GripTaskCharacter.h"
-#include "GripTask/Core/DebugMacros.h"
 
 UTargetComponent::UTargetComponent()
 {
@@ -81,4 +81,22 @@ void UTargetComponent::RaycastTargetInterface()
 	}
 
 	UnsetTarget();
+}
+
+void UTargetComponent::DoDamage() const
+{
+	if (Target)
+	{
+		const int RandomDamage = FMath::RandRange(5, 35);
+		Target->GetAttributeComponent()->ApplyDamage(RandomDamage);
+	}
+}
+
+void UTargetComponent::DoHeal() const
+{
+	if (Target)
+	{
+		const int RandomHeal = FMath::RandRange(5, 35);
+		Target->GetAttributeComponent()->ApplyHeal(RandomHeal);
+	}
 }

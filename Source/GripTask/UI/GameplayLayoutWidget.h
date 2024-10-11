@@ -26,14 +26,17 @@ class GRIPTASK_API UGameplayLayoutWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
-	UUnitFrameWidget* GetPlayerUnitFrameWidget() const { return PlayerUnitFrameWidget; }
-	UUnitFrameWidget* GetTargetUnitFrameWidget() const { return TargetUnitFrameWidget; }
-	UMinimapWidget* GetMinimapWidget() const { return MinimapWidget; }
 	void SetQuestMenu(bool bQuestMenuVisible) const;
-
+	void SetInventoryMenu(bool bInventoryMenuVisible) const;
+	
+	FORCEINLINE UUnitFrameWidget* GetPlayerUnitFrameWidget() const { return PlayerUnitFrameWidget; }
+	FORCEINLINE UUnitFrameWidget* GetTargetUnitFrameWidget() const { return TargetUnitFrameWidget; }
+	FORCEINLINE UMinimapWidget* GetMinimapWidget() const { return MinimapWidget; }
+	
 protected:
 	UFUNCTION()
 	void InitializePlayerWidgets();
+	void SubscribeTargetChange(TScriptInterface<ITargetInterface> PlayerTargetInterface);
 
 	UPROPERTY(EditDefaultsOnly, Category="Player Widgets")
 	TSubclassOf<class UUnitFrameWidget> PlayerUnitFrameClass;
@@ -46,6 +49,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Player Widgets")
 	TSubclassOf<class UQuestMenu> QuestMenuClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="Player Widgets")
+	TSubclassOf<class UInventoryMenu> InventoryMenuClass;
 
 	UPROPERTY(meta = (BindWidget))
 	UNamedSlot* PlayerUnitFrameSlot;
@@ -62,6 +68,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* CanvasPanel;
 
+	UPROPERTY(meta = (BindWidget))
+	UNamedSlot* InventoryMenuSlot;
+
 private:
 	TWeakObjectPtr<AGripTaskCharacter> PlayerCharacter;
 
@@ -76,6 +85,9 @@ private:
 
 	UFUNCTION()
 	void InitializeQuestMenu();
+
+	UFUNCTION()
+	void InitializeInventoryMenu();
 
 	UFUNCTION()
 	void SetPlayerFrame(TScriptInterface<ITargetInterface> Target);
@@ -97,4 +109,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
 	class UQuestMenu* QuestMenuWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Player Widgets", meta = (AllowPrivateAccess = "true"))
+	class UInventoryMenu* InventoryMenuWidget;
 };

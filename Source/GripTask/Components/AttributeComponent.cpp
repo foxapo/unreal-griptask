@@ -57,6 +57,28 @@ void UAttributeComponent::ConsumeMana(const float Value)
 	NotifyManaChanged();
 }
 
+// JUST TESTING METHODS (OF COURSE THIS COULD BE DONE MORE COMPLEX AND WITH MORE FEATURES)
+
+void UAttributeComponent::ApplyDamage(float Value)
+{
+	CurrentHealth -= Value;
+	if (CurrentHealth <= 0)
+	{
+		CurrentHealth = 0;
+	}
+	NotifyHealthChanged();
+}
+
+void UAttributeComponent::ApplyHeal(float Value)
+{
+	CurrentHealth += Value;
+	if (CurrentHealth > MaxHealth)
+	{
+		CurrentHealth = MaxHealth;
+	}
+	NotifyHealthChanged();
+}
+
 FName UAttributeComponent::GetId() const
 {
 	return CharacterStatsId;

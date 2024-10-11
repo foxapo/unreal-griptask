@@ -42,16 +42,15 @@ void UQuestMenu::OnQuestSelected(UQuestItemData* QuestData)
 {
 	if (QuestData == nullptr)
 	{
-		ActiveQuestName->SetVisibility(ESlateVisibility::Hidden);
-		ActiveQuestIcon->SetVisibility(ESlateVisibility::Hidden);
-		ActiveQuestDescription->SetVisibility(ESlateVisibility::Hidden);
+		ActiveQuestName->SetText(FText::FromString("No quest selected"));
+		ActiveQuestIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ActiveQuestDescription->SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 
 	ActiveQuestName->SetText(FText::FromString(QuestData->QuestName));
 	ActiveQuestIcon->SetBrushFromTexture(QuestData->QuestIcon);
 	ActiveQuestDescription->SetText(FText::FromString(QuestData->QuestDescription));
-	ActiveQuestName->SetVisibility(ESlateVisibility::Visible);
 	ActiveQuestIcon->SetVisibility(ESlateVisibility::Visible);
 	ActiveQuestDescription->SetVisibility(ESlateVisibility::Visible);
 }
