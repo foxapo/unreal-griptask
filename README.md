@@ -34,7 +34,7 @@ T       -   Select self
 - For easy access to the UI HUD - use `GlobalUtils::GetGameplayHUD`
 - `GripTaskCharacter` is a main Player's Actor class that implements `ITargetInterface`, same does the dummy actor class
   for NPCs `TargetDummyActor`.
-- Separate logic in `AttributeComponent` and `TargetComponent`
+- Separate logic in `AttributeComponent` and `TargetComponent` inherited from `UActorComponent`.
 
 #### Attribute Component
 
@@ -53,7 +53,14 @@ T       -   Select self
 - [x] In-Game Mouse Controls
 
 Replace the default behavior by changing the enhanced input mapping. We should disable the default rotation towards
-movement.
+movement. 
+
+```c++
+// Don't rotate when the controller rotates. Let that just affect the camera.
+bUseControllerRotationPitch = false;
+bUseControllerRotationYaw = false;
+bUseControllerRotationRoll = false;
+```
 
 ---
 
@@ -73,6 +80,8 @@ used for updating the Nameplates.
 
 - Active Nameplate is highlighted through the `TargetComponent` callback passed through the `GameplayHUD`. `GameplayHUD`
   caches the currently active Nameplate.
+
+- I tried to profile the performance of the Nameplates and there seems to be no performance impact. 
 
 ---
 
@@ -107,6 +116,10 @@ scripts. Player UI Inventory only represents the data.
 
 UI Inventory should be updated only when the data changes.
 
+The idea of implementing the Inventory System is split to two parts - UI and Data. The UI is only a representation of the data structure in some human readable form. Based on the complexity of inventory system, like slots, various grid sizes or just 1x1 slot size like in WoW. All these aspects lead to the further way how the inventory system is implemented. At this scenario, only 1x1 slot based inventory is desired so this could be achieved with some simple 2D array of `UInventorySlot` structure, that would contain data about `UInventoryItem` passed on the widget. Drag N Drop would be implemented through the `UDraggableWidget` class and all dragging actions are validated against the data layer so player is not able to drag the item to the wrong slot or to the wrong inventory.
+
+This was not implemented due to time constraints.
+
 ---
 
 - [ ] Drag and drop dialogs + Tooltips (OPTIONAL)
@@ -118,21 +131,33 @@ didn't have much time to spend another time on this.
 
 Pseudo-idea of the implementation:
 
-- Create a handler that takes care of the currently dragged element and detach the widgets from their slots, eventually
-  expose a new draggable widget visual for the `UDraggableWidgetDragDropOperations` class.
+- My idea was to create base class for `UUSerWidget` named `DraggableWidgetBase`. Layout should be aware of all these widgets and manage them based on the currently active `Draggable` so it can reparent and change the ZIndex of the dragged widget. 
+- I spent too much time on investigating the Drag'n'Drop and because I use the NamedSlots that gives the limitation in size and position of the widget, I decided to not lose a lot of time on that. 
+- Drag'n'Drop mechanic is quite complex thing and it can be achieved in many ways but for sake of this demo, I believe the explanation is just enough.
+
+## Performance
+
+I tried to spawn 408 actors and see the performance impact on the game. The game was still running smoothly around 30-40 FPS but on GTX3080 so It's not a good measure. The problem is not coming from the scripting part, but more from the rendering part, where all the progress bars and various widgets stack on top of each other cast draw calls on the GPU. I believe this could be handled better with some instanced materials or some other optimization techniques but I couldn't have a chance to look on that during this one week. 
+
+Also a big performance impact would have some culling of the nameplates. This can be achieved by some distance check to the potential Targets and only render the Nameplates when they are in the certain range and no obstacle is blocking the view. 
+
+All these optimization steps are not implemented in this demo due to time limitations but are taken into consideration.
+
+![profilling.jpg](profilling.jpg)
+
 
 ## Conclusion
 
 Since I started completely from scratch with almost no previous knowledge of Unreal Engine, this was a great learning
-experience. I can confidently say, that this task would take me much less time in the Unity Engine but the general idea
-is very similar.
+experience. 
 
 Most important part of this task is to be careful about `NativeTick` of the ui widgets that can be overwhelming when not
 used wisely.
 
 Unreal Engine covers a lot of things automatically from the ground so it was really refreshing to see how much stuff is
-already implemented and how much time it can save.
+already implemented and how much time it can save. UMG is very convenient comparing to the Unity's Legacy UI system. I am very curious about exploring some more advanced frameworks for the UI. 
 
-Most annoying part was wasting couple hours on loosing the reference in Blueprint class on certain `TargetComponent`.
+Most annoying part was wasting couple hours on losing the reference in Blueprint class on certain `TargetComponent`.
 For some reason the Unreal Engine when using `HotReload` cause issues to certain objects serialized in the editor. Also
-`DataTables` cannot be changed when using HotReload. 
+`DataTables` cannot be changed when using HotReload. There were some other issues with the Editor and probably HotReload all together. I found out that it is much better to just build the project and sometimes restart the editor.
+

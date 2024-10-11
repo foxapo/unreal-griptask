@@ -16,13 +16,11 @@ void UAttributeComponent::BeginPlay()
 
 void UAttributeComponent::NotifyHealthChanged() const
 {
-	DEBUG_PRINT("Health changed");
 	OnHealthChanged.Broadcast(CurrentHealth);
 }
 
 void UAttributeComponent::NotifyManaChanged() const
 {
-	DEBUG_PRINT("Mana changed");
 	OnManaChanged.Broadcast(CurrentMana);
 }
 
